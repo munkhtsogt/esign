@@ -59,6 +59,7 @@ app.post('/verify', function (req, res) {
                 const result = verifier.verify(public_key, s.signature, 'base64');
                 res.json({ success: result });
             }
+            res.json({ success: false });
         })
         .catch(err => {
             console.log(err);
@@ -67,5 +68,5 @@ app.post('/verify', function (req, res) {
 });
 
 app.listen(3000, function () {
-    console.log('Example app listening on port 3000!');
+    console.log('E-sign app listening on port 3000!');
 });

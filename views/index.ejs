@@ -3,7 +3,7 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>E-Sign</title>
+        <title>Digital Signature Algorithm</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <link rel="shortcut icon" href="/static/img/favicon.ico">
         <link rel="stylesheet" href="/static/css/style.css">
@@ -42,14 +42,13 @@
                 });
                 
                 $('#clear').click(function() {
-                    signaturePad.clear();
-                    $('#full_name').val("");
+                    clear();
                 });
                 
                 $('#save').click(function() {
                     var full_name = $.trim($('#full_name').val());
                     if (full_name.length == 0 || signaturePad.isEmpty()) {
-                        noty('error', 'Бүтэн нэр болон гарын үсэгээ зурна уу!');
+                        noty('warning', 'Please enter full name and signature!');
                         return false;
                     }
                     
@@ -62,21 +61,36 @@
                         },
                         success: function(response) {
                             if (response.success) {
-                                signaturePad.clear();
-                                var li = '<li><img src="'+ response.signature['image'] +'" width="300"></li>';
-                                $('#histories').append(li);
-                                noty('success', 'Таны гарыг үсгийг амжилттай хадгаллаа!');
+                                clear();
+                                var tr = '<tr>' +
+                                            '<td>' +
+                                                '<img src="'+ response.signature['image'] +'" width="300">' +
+                                            '</td>' +
+                                            '<td>' +
+                                                response.signature['signature'].substring(0, 50) + '...' +
+                                            '</td>' +
+                                            '<td>' +
+                                                '<a href="javascript:;" onclick="verify(\''+ response.signature['_id'] +'\');">Verify</a>'+
+                                            '</td>' +
+                                        '</tr>';
+                                $('#histories').append(tr);
+                                noty('success', 'The signature successfully saved!');
                             }
                             else {
-                                noty('error', 'Алдаа гарлаа!');
+                                noty('error', 'Error occurred!');
                             }
                         }
                     });
                 });
+                
+                function clear() {                
+                    signaturePad.clear();
+                    $('#full_name').val("");
+                }
             });
-            
+
             function verify(signature_id) {
-                var full_name = prompt("Бүтэн нэрээ оруулна уу?"); 
+                var full_name = prompt("Please enter full name?"); 
                 if (full_name) {
                     $.ajax({
                         method: "POST",
@@ -87,10 +101,10 @@
                         },
                         success: function(response) {
                             if (response.success) {
-                                noty('success', 'Таны гарыг үсгийг амжилттай шалгалаа!');
+                                noty('success', 'Signature successfully verified!');
                             }
                             else {
-                                noty('error', 'Цахим гарын үсэг таарахгүй байна!');
+                                noty('error', 'Can\'t verify the signature!');
                             }
                         }
                     });
@@ -109,34 +123,34 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <h2>Тест цахим гарын үсэг</h2>
-                    <label>Таны нэр</label>
+                    <h2>Digital Signature Test</h2>
+                    <label>Full Name</label>
                     <input type="text" id="full_name" name="full_name" class="form-control col-lg-6">
-                    <label class="mt-2 mb-2">Гарын үсэг</label>
+                    <label class="mt-2 mb-2">Signature</label>
                     <canvas id="signature-pad" class="signature-pad"></canvas>
                     <div class="mt-2">
-                        <button id="clear" class="btn btn-danger">Арилгах</button>
-                        <button id="save" class="btn btn-success">Хадгалах</button>
+                        <button id="clear" class="btn btn-danger">Clear</button>
+                        <button id="save" class="btn btn-success">Save</button>
                     </div>
                 </div>
                 <div class="col-lg-12">
-                    <h2 class="mt-2">Түүх</h2>
+                    <h2 class="mt-2">History</h2>
                     <div class="history">
                         <table class="table table-stripped table-small">
                             <thead>
                                 <tr>
                                     <th width="33%">
-                                        Зураг
+                                        Pic
                                     </th>
                                     <th width="33%">
-                                        Дижитал гарын үсэг
+                                        Digital Signature
                                     </th>
                                     <th width="33%">
-                                        Үйлдэл
+                                        &nbsp;
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="histories">
                                 <% signatures.forEach(function(signature) { %>
                                 <tr>
                                     <td>
@@ -146,7 +160,7 @@
                                         <%= signature.signature.substring(0, 50) %>...
                                     </td>
                                     <td>
-                                        <a href="javascript:;" onclick="verify('<%= signature._id %>');">Шалгах</a>
+                                        <a href="javascript:;" onclick="verify('<%= signature._id %>');">Verify</a>
                                     </td>
                                 </tr>
                                 <% }); %>
