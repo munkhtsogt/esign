@@ -1,8 +1,9 @@
-#!bin\bash
+#!/bin/bash
 
-git commit -am "temp"
+git commit -am "custom commit"
 git push heroku master
 heroku logs --tail
-heroku config:set PROD_MONGODB=mongodb+srv://lps:lps2020$@cluster0-ssupn.mongodb.net/test?retryWrites=true&w=majority
-heroku addons:create mongolab
-heroku addons:create mongolab:shared-cluster-1
+
+heroku addons:create mongolab:sandbox
+heroku config:get MONGODB_URI
+

@@ -10,6 +10,7 @@ const Signature = require("./models/signature");
 const app = express();
 const private_key = fs.readFileSync('./keys/privateKey.pem', 'utf-8');
 const public_key = fs.readFileSync('./keys/publicKey.pem', 'utf-8');
+require('dotenv').config();
 
 app.use('/static', express.static('static'));
 app.use(bodyParser.json());
@@ -19,7 +20,7 @@ app.set('view engine', 'ejs');
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect(config.database, { useUnifiedTopology: true, useNewUrlParser: true })
+mongoose.connect(process.env.MONGODB_URI || config.database, { useUnifiedTopology: true, useNewUrlParser: true })
   .then(() =>  console.log('mongodb connection succesful'))
   .catch((err) => console.error(err));
 
@@ -67,6 +68,8 @@ app.post('/verify', function (req, res) {
         });
 });
 
-app.listen(3000, function () {
-    console.log('E-sign app listening on port 3000!');
+const port = process.env.PORT || 3000;
+
+app.listen(port, function () {
+    console.log('E-sign app listening on port '+ port +'!');
 });
